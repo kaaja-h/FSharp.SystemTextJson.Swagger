@@ -4,7 +4,7 @@ on:
     branches:
       - main # Default release branch, may also be named 'master' or 'develop'
 jobs: 
-  publish: 
+  publish:  
     name: build, pack & publish
     runs-on: ubuntu-latest
     steps:
