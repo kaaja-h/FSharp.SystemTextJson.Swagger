@@ -55,7 +55,6 @@ type DependencyExtension() =
                 (Option.get setup) options
             options.UseAllOfToExtendReferenceSchemas()
             options.UseOneOfForPolymorphism()
-            options.SchemaFilter<Collections.MapSchemaFilter>()
             options.SchemaFilter<Tuple.TupleSchemaFilter>()
             let currentSelector = options.SchemaGeneratorOptions.SubTypesSelector
             options.SchemaGeneratorOptions.SubTypesSelector <- SubtypeSelector.selector fsOptions currentSelector
@@ -65,7 +64,6 @@ type DependencyExtension() =
     
     static member PrepareFilters(): seq<ISchemaFilter> =
         seq{
-            yield Collections.MapSchemaFilter()
             yield Tuple.TupleSchemaFilter()
         }            
     

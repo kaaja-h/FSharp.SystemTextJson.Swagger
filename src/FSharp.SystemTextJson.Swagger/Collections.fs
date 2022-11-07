@@ -23,15 +23,6 @@ let createDataContractMap (typeToConvert:Type)  (options: JsonSerializerOptions)
     if (isWrappedString genArgs[0] || genArgs[0] = typeof<string> ) then
         DataContract.ForDictionary(typeToConvert, genArgs[1], jsonConverter= (Helper.getJsonConverterFunc options) )
     else
-        let listType = AbstractSubtypes.makeAbstractGenericTypeArray AbstractSubtypes.abstractMapType genArgs
-        DataContract.ForArray(typeToConvert,listType, Helper.getJsonConverterFunc options )
+        let tupleType = FSharpType.MakeTupleType(genArgs)
+        DataContract.ForArray(typeToConvert,tupleType, Helper.getJsonConverterFunc options )
         
-  
-type MapSchemaFilter() =
-    interface ISchemaFilter with
-        member this.Apply(schema, context) =
-            if AbstractSubtypes.isArrayOfGenericType context.Type AbstractSubtypes.abstractMapType  then
-                    schema.MaxItems <- 2
-                    schema.MinItems <- 2
-            
- 
