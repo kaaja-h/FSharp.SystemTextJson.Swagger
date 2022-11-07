@@ -7,7 +7,7 @@
         <Title>FSharp.SystemTextJson.Swagger</Title>
         <Description>Swagger settings for [FSharp.SystemTextJson]</Description>
         <PackageProjectUrl>https://github.com/kaaja-h/FSharp.SystemTextJson.Swagger</PackageProjectUrl>
-        <PackageLicenseUrl>https://raw.githubusercontent.com/kaaja-h/FSharp.SystemTextJson.Swagger/main/LICENSE</PackageLicenseUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/kaaja-h/FSharp.SystemTextJson.Swagger</RepositoryUrl>
         <PackageTags>FSharp SystemTextJson Swagger</PackageTags>
         <AssemblyVersion>0.0.1</AssemblyVersion>

@@ -45,6 +45,7 @@ let isSkip (ty: Type) =
     else
         fun _ -> false
 
+#nowarn "0044"
 let ignoreNullValues (options: JsonSerializerOptions) =
     options.IgnoreNullValues
     || options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
