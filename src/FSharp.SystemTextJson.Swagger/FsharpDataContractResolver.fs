@@ -43,7 +43,11 @@ type internal FsharpDataContractResolver(options:JsonSerializerOptions, fsOption
             | TypeCache.TypeKind.Map -> Collections.createDataContractMap ``type`` options
             | TypeCache.TypeKind.Tuple -> Tuple.createDataContractTuple ``type`` options
             | _ ->
-                json.GetDataContractForType(``type``)
+                match ``type`` with
+                | AbstractSubtypes.GenericType AbstractSubtypes.abstractUnionCase [|unionType;caseType |]   ->
+                        Union.createDataContractForCase unionType caseType ``type`` fsOptions options json
+                       // json.GetDataContractForType(``type``)
+                | _ -> json.GetDataContractForType(``type``)
             
 
 [<Extension>]

@@ -12,6 +12,7 @@
         <Compile Include="TestCommon.fs" />
         <Compile Include="Collections.fs" />
         <Compile Include="Tuple.fs" />
+        <Compile Include="Union.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
   <ItemGroup>

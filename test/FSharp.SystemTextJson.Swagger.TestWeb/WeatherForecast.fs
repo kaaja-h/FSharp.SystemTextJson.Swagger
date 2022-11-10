@@ -7,6 +7,11 @@ type ttt = {
     i:int option
 }
 
+type Union =
+    |Aaa
+    |Bbb
+    |Ccc of int
+
 type LLL(myReadWriteProperty:string) =
     
     let mutable myInternalValue = myReadWriteProperty
@@ -26,6 +31,7 @@ type WeatherForecast =
       m: Map<int,ttt>
       tuple: (int*string)
       lll:LLL
+      u:Union
       }
 
 

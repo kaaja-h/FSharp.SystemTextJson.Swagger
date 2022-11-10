@@ -11,6 +11,7 @@ let selector (fsOptions: JsonFSharpOptions) (defaultSelector:Func<Type, IEnumera
     | MapType(keyType,valueType) ->
         [|keyType;valueType|] |> Seq.distinct
     | TupleType(tupleType) ->
-        FSharpType.GetTupleElements(tupleType) |> Seq.distinct 
+        FSharpType.GetTupleElements(tupleType) |> Seq.distinct
+    | UnionType(unionType) -> Union.getVirtualSubtypes(unionType)        
     | _ ->
         defaultSelector.Invoke(typeToConvert)
