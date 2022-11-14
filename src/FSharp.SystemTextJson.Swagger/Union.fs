@@ -44,9 +44,7 @@ let createDataContract (typeToConvert:Type) (fsOptions: JsonFSharpOptions) (opti
 
 
 let prepareEnumTypeForSingleCases (typeToConvert:Type) value =
-    let unionCases = FSharpType.GetUnionCases typeToConvert
-    let enumItems = [value]        
-    AbstractSubtypes.generateEnum (sprintf "%s.%s"  typeToConvert.Namespace typeToConvert.Name) (value+"Enum") enumItems
+    AbstractSubtypes.generateEnum (sprintf "%s.%s"  typeToConvert.Namespace typeToConvert.Name) (value+"Enum") value
     
    
 let getVirtualSubtypes (typeToConvert:Type) (fsOptions: JsonFSharpOptions) =
@@ -172,16 +170,11 @@ let createDataContractForRecordCase (typeToConvert:Type) (typeCase:Type) (record
                                 | null -> options.PropertyNamingPolicy
                                 | policy -> policy
                             [| Helper.convertName policy name |]
-                    {| Type = p.PropertyType
-                       Names = names
-                       Nullable = Helper.isNullable p.PropertyType
-                       Required = not canBeSkipped
-                       IsSkip = Helper.isSkip p.PropertyType
-                       PropetyInfo = p
-                        |}
+                    let nullable = Helper.isNullable p.PropertyType                             
+                    DataProperty(names[0], p.PropertyType, not canBeSkipped, nullable, false, false, p )                                                
+                    
                 )  
-    let properties = fields |> Seq.map (fun f -> DataProperty(f.Names[0], f.Type, f.Required, f.Nullable, false, false, f.PropetyInfo ))
-    DataContract.ForObject( recordType, properties)
+    DataContract.ForObject( recordType, fields)
       
 
     

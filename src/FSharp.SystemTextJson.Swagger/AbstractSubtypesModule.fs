@@ -1,6 +1,8 @@
 ﻿module internal FSharp.SystemTextJson.Swagger.AbstractSubtypes
 
 open System
+open System.Collections.Concurrent
+open System.Collections.Generic
 open System.Reflection
 open System.Reflection.Emit
 open System.Text.Json.Serialization
@@ -43,8 +45,10 @@ let getType (ty:Type) =
     | GenericType abstractUnionType [|unionType|] -> UnionType(unionType)
     | _ -> Other
     
+
+
     
-let generateEnum moduleName enumName cases =
+let generateEnumForCache moduleName enumName case =
     let aName = new AssemblyName(moduleName)
     let ab = AssemblyBuilder.DefineDynamicAssembly(aName,  AssemblyBuilderAccess.Run )
     let mb = ab.DefineDynamicModule(moduleName)
@@ -52,11 +56,16 @@ let generateEnum moduleName enumName cases =
     let converterConstructor = typedefof<JsonConverterAttribute>.GetConstructor([|typeof<Type>|])
     let myCABuilder = new CustomAttributeBuilder(converterConstructor,[|typedefof<JsonStringEnumConverter>|])
     enumBuilder.SetCustomAttribute(myCABuilder)
-    
-    cases |> Seq.fold (fun i c ->
-                        enumBuilder.DefineLiteral(c,i) |> ignore
-                        i + 1 ) 0 |> ignore
+    enumBuilder.DefineLiteral(case,0)
     enumBuilder.CreateType()
+
+
+
+let generateEnum =
+    let cache = ConcurrentDictionary<string*string*string, Type>()
+    fun moduleName enumName case ->
+        cache.GetOrAdd ( (moduleName,enumName, case ),  fun (a,b,c) -> generateEnumForCache a b c  )
+        
     
     
 let generateCases (case:UnionCaseInfo)  =
