@@ -52,13 +52,15 @@ let generateEnumForCache moduleName enumName case =
     let aName = new AssemblyName(moduleName)
     let ab = AssemblyBuilder.DefineDynamicAssembly(aName,  AssemblyBuilderAccess.Run )
     let mb = ab.DefineDynamicModule(moduleName)
-    let enumBuilder = mb.DefineEnum(enumName, TypeAttributes.Public, typedefof<int32>)
+    let eb = mb.DefineType(enumName, TypeAttributes.AutoLayout ||| TypeAttributes.AnsiClass ||| TypeAttributes.Sealed, typeof<System.Enum>, PackingSize.Unspecified, TypeBuilder.UnspecifiedTypeSize)
     let converterConstructor = typedefof<JsonConverterAttribute>.GetConstructor([|typeof<Type>|])
     let myCABuilder = new CustomAttributeBuilder(converterConstructor,[|typedefof<JsonStringEnumConverter>|])
-    enumBuilder.SetCustomAttribute(myCABuilder)
-    enumBuilder.DefineLiteral(case,0) |> ignore
-    enumBuilder.CreateType()
-
+    eb.SetCustomAttribute(myCABuilder)
+    eb.DefineField("value__",typedefof<int32>,FieldAttributes.Public ||| FieldAttributes.SpecialName ||| FieldAttributes.RTSpecialName) |> ignore
+    let f = eb.DefineField(case, eb, FieldAttributes.Static ||| FieldAttributes.Public ||| FieldAttributes.Literal)
+    f.SetConstant(0)
+    eb.CreateType()        
+    
 
 
 let generateEnum =

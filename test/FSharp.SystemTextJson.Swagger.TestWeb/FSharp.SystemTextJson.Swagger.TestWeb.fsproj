@@ -5,17 +5,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="WeatherForecast.fs"/>
-        <Compile Include="Controllers/WeatherForecastController.fs"/>
-        <Compile Include="Program.fs"/>
+        <Compile Include="WeatherForecast.fs" />
+        <Compile Include="Controllers/WeatherForecastController.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../../src/FSharp.SystemTextJson.Swagger/FSharp.SystemTextJson.Swagger.fsproj"/>
+        <ProjectReference Include="../../src/FSharp.SystemTextJson.Swagger/FSharp.SystemTextJson.Swagger.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
 </Project>

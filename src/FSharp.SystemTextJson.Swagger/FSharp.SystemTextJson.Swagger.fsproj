@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <PackageVersion>0.0.2</PackageVersion>
         <Title>FSharp.SystemTextJson.Swagger</Title>
@@ -12,6 +11,7 @@
         <PackageTags>FSharp SystemTextJson Swagger</PackageTags>
         <AssemblyVersion>0.0.2</AssemblyVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
