@@ -21,32 +21,30 @@ type internal FsharpDataContractResolver(options:JsonSerializerOptions, fsOption
 
     let json = JsonSerializerDataContractResolver(options)
     
-    let customOptions (t: Type) =
-        match t.GetCustomAttributes(typedefof<JsonFSharpConverterAttribute>, false) with
-        | [| atr |] ->
-            atr :?> IJsonFSharpConverterAttribute
-            |> (fun d -> d.Options)
-            |> Some
-        | _ -> None
+
     
     interface ISerializerDataContractResolver with
         member this.GetDataContractForType(``type``) =
-            let fsOptions =
-                customOptions ``type``
-                |> Option.defaultValue fsOptions
+            let effectivefsOptions = Helper.getEffectiveFsOptions ``type`` fsOptions
             let r= json.GetDataContractForType(``type``)
             match TypeCache.getKind ``type`` with
-            | TypeCache.TypeKind.Record -> Record.createDataContract ``type`` fsOptions options
-            | TypeCache.TypeKind.Union -> Union.createDataContract  ``type`` fsOptions options this
+            | TypeCache.TypeKind.Record -> Record.createDataContract ``type`` effectivefsOptions options
+            | TypeCache.TypeKind.Union -> Union.createDataContract  ``type`` effectivefsOptions options this
             | TypeCache.TypeKind.List -> Collections.createDataContractList ``type`` options
             | TypeCache.TypeKind.Set -> Collections.createDataContractList ``type`` options
             | TypeCache.TypeKind.Map -> Collections.createDataContractMap ``type`` options
             | TypeCache.TypeKind.Tuple -> Tuple.createDataContractTuple ``type`` options
             | _ ->
                 match ``type`` with
-                | AbstractSubtypes.GenericType AbstractSubtypes.abstractUnionCase [|unionType;caseType |]   ->
-                        Union.createDataContractForCase unionType caseType ``type`` fsOptions options json
-                       // json.GetDataContractForType(``type``)
+                | AbstractSubtypes.GenericInherit AbstractSubtypes.abstractUnionCase [|unionType |]   ->
+                        Union.createDataContractForCase unionType ``type`` (effectivefsOptions |> Helper.getEffectiveFsOptions unionType )options json
+                | _ when ``type``= (typedefof<EmptyArray>) ->
+                        DataContract.ForArray(``type``,typeof<string>)
+                | AbstractSubtypes.GenericType AbstractSubtypes.recordForUnionCase [| casetype |] ->
+                    match casetype with
+                    | AbstractSubtypes.GenericInherit AbstractSubtypes.abstractUnionCase [|unionType |]   ->
+                        Union.createDataContractForRecordCase unionType casetype ``type`` fsOptions options this
+                    | _ -> json.GetDataContractForType(``type``)
                 | _ -> json.GetDataContractForType(``type``)
             
 
@@ -59,6 +57,7 @@ type DependencyExtension() =
                 (Option.get setup) options
             options.UseAllOfToExtendReferenceSchemas()
             options.UseOneOfForPolymorphism()
+            options.SupportNonNullableReferenceTypes()
             options.SchemaFilter<Tuple.TupleSchemaFilter>()
             let currentSelector = options.SchemaGeneratorOptions.SubTypesSelector
             options.SchemaGeneratorOptions.SubTypesSelector <- SubtypeSelector.selector fsOptions currentSelector

@@ -13,6 +13,7 @@
         <Compile Include="Collections.fs" />
         <Compile Include="Tuple.fs" />
         <Compile Include="Union.fs" />
+        <Compile Include="ValidatorTests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
   <ItemGroup>
@@ -21,6 +22,7 @@
     <ItemGroup>
         <PackageReference Include="FSharp.SystemTextJson" Version="1.0.6" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="NJsonSchema" Version="10.8.0" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
         <PackageReference Include="xunit" Version="2.4.1" />

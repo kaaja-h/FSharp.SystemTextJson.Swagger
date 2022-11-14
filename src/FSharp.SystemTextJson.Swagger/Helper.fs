@@ -1,6 +1,7 @@
 ﻿module internal FSharp.SystemTextJson.Swagger.Helper
 
 open System
+open System.Collections.Generic
 open System.Text.Json
 open System.Text.Json.Serialization
 open Microsoft.FSharp.Reflection
@@ -60,3 +61,24 @@ let getJsonConverterFunc (serializerOptions:JsonSerializerOptions) =
 let internal getGenericType (typeToConvert:Type)  =
     typeToConvert.GetGenericArguments()[0]
     
+    
+let customOptions (t: Type) =
+        match t.GetCustomAttributes(typedefof<JsonFSharpConverterAttribute>, false) with
+        | [| atr |] ->
+            atr :?> IJsonFSharpConverterAttribute
+            |> (fun d -> d.Options)
+            |> Some
+        | _ -> None
+        
+let getEffectiveFsOptions  (t: Type) fsOptions =
+        customOptions t  |> Option.defaultValue fsOptions
+
+let getJsonFieldNames (getAttributes: Type -> obj[]) =
+    getAttributes typeof<JsonNameAttribute>
+    |> Seq.choose (
+        function
+        | :? JsonNameAttribute as attr when not (isNull attr.Field) -> Some(attr.Field, attr.AllNames)
+        | _ -> None
+    )
+    |> readOnlyDict        
+        

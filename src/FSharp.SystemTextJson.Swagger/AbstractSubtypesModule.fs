@@ -5,15 +5,16 @@ open System.Reflection
 open System.Reflection.Emit
 open System.Text.Json.Serialization
 open FSharp.SystemTextJson
-
-let abstractMapType = typedefof<AbstractMapDefinition<_, _>>
+open Microsoft.FSharp.Reflection
 
 let abstractTupleType = typedefof<AbstractTupleDefinition<_>>
 
 let abstractUnionType = typedefof<AbstractUnion<_>>
 
-let abstractUnionCase = typedefof<AbstractUnionCase<_,_>>
-let abstractEmptyCase = typedefof<AbstractEmptyCase<_>>
+let abstractUnionCase = typedefof<UnionCase<_>>
+
+let recordForUnionCase = typedefof<RecordForUnionCase<_>>
+
 
 let makeAbstractGenericTypeArray (tGeneric:Type) (tInner:Type[]) =
     let abstractType = tGeneric.MakeGenericType( tInner )
@@ -29,10 +30,15 @@ let (|GenericType|_|) (tToCompare) (t: Type) =
        Some( t.GenericTypeArguments)
    else
        None
+       
+let (|GenericInherit|_|) (tToCompare: Type) (t: Type) =
+   if t.BaseType <> null && t.BaseType.IsGenericType && t.BaseType.GetGenericTypeDefinition()= tToCompare then
+       Some( t.BaseType.GenericTypeArguments)
+   else
+       None
 
 let getType (ty:Type) =
     match ty with
-    | GenericType abstractMapType [|keyType;valType|] -> MapType(keyType,valType)
     | GenericType abstractTupleType [|tupleType|] -> TupleType(tupleType)
     | GenericType abstractUnionType [|unionType|] -> UnionType(unionType)
     | _ -> Other
@@ -50,4 +56,15 @@ let generateEnum moduleName enumName cases =
     cases |> Seq.fold (fun i c ->
                         enumBuilder.DefineLiteral(c,i) |> ignore
                         i + 1 ) 0 |> ignore
-    enumBuilder.CreateType()    
+    enumBuilder.CreateType()
+    
+    
+let generateCases (case:UnionCaseInfo)  =
+    let moduleName = sprintf "%s.%s" case.DeclaringType.Namespace case.DeclaringType.Name 
+    let aName = new AssemblyName(moduleName)
+    let ab = AssemblyBuilder.DefineDynamicAssembly(aName,  AssemblyBuilderAccess.Run )
+    let mb = ab.DefineDynamicModule(moduleName)
+    let parentType = abstractUnionCase.MakeGenericType(case.DeclaringType)
+    let classBuilder = mb.DefineType(case.Name,TypeAttributes.Public,parentType )
+    classBuilder.CreateType()
+    
