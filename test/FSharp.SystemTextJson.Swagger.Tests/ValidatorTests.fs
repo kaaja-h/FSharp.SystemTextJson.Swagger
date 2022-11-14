@@ -110,6 +110,26 @@ let testData : obj[] list =
         [| "InternalTag with NamedFields and custom unionFieldNamingPolicy NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
         [| "InternalTag with NamedFields and custom unionFieldNamingPolicy WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
         [| "InternalTag with NamedFields and custom unionFieldNamingPolicy WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        // simple Untagged
+        [| "simple Untagged NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.Untagged) |]
+        [| "simple Untagged WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.Untagged) |]
+        [| "simple Untagged WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.Untagged) |]
+        // Untagged with UnwrapFieldlessTags
+        [| "Untagged with UnwrapFieldlessTags NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "Untagged with UnwrapFieldlessTags WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "Untagged with UnwrapFieldlessTags WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        // Untagged with UnwrapSingleFieldCases
+        [| "Untagged with UnwrapSingleFieldCases NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "Untagged with UnwrapSingleFieldCases WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "Untagged with UnwrapSingleFieldCases WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        // Untagged with NamedFields
+        [| "Untagged with NamedFields NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.NamedFields )) |]
+        [| "Untagged with NamedFields WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.NamedFields )) |]
+        [| "Untagged with NamedFields WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.NamedFields )) |]
+        // Untagged with NamedFields and custom unionFieldNamingPolicy
+        [| "Untagged with NamedFields and custom unionFieldNamingPolicy NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "Untagged with NamedFields and custom unionFieldNamingPolicy WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "Untagged with NamedFields and custom unionFieldNamingPolicy WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.Untagged |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
     ]
 
 
@@ -132,9 +152,11 @@ let validate (testName )(typeToSerialize:Type) (data) (jsonOptions:JsonSerialize
     
 let oneRowTest : obj[] list =
     [
- [| "InternalTag with NamedFields NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]
- [| "InternalTag with NamedFields WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]
- [| "InternalTag with NamedFields WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]    ]
+// simple Untagged
+        [| "simple Untagged NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.Untagged) |]
+        [| "simple Untagged WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.Untagged) |]
+        [| "simple Untagged WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.Untagged) |]
+]
    
 [<Theory>]
 [<MemberData(nameof(oneRowTest))>]

@@ -132,7 +132,11 @@ let createDataContractForInternalTag (typeToConvert:Type) (typeCase:Type) (fsOpt
                  
         let tupleType = FSharpType.MakeTupleType( Array.append [|enumType|] fields   )
         innerResolver.GetDataContractForType(tupleType)
-    
+
+
+let createDataContractForUntagged (typeToConvert:Type) (typeCase:Type) (fsOptions: JsonFSharpOptions) (options: JsonSerializerOptions) (innerResolver:ISerializerDataContractResolver) =
+    let recordType = typedefof<RecordForUnionCase<_>>.MakeGenericType(typeCase)
+    innerResolver.GetDataContractForType(recordType)
     
 let createDataContractForCase (typeToConvert:Type) (typeCase:Type) (fsOptions: JsonFSharpOptions) (options: JsonSerializerOptions) (innerResolver:ISerializerDataContractResolver) =
      
@@ -141,7 +145,9 @@ let createDataContractForCase (typeToConvert:Type) (typeCase:Type) (fsOptions: J
     elif fsOptions.UnionEncoding.HasFlag JsonUnionEncoding.ExternalTag then
         createDataContractForExternalTag typeToConvert typeCase fsOptions options innerResolver
     elif fsOptions.UnionEncoding.HasFlag JsonUnionEncoding.InternalTag then
-        createDataContractForInternalTag typeToConvert typeCase fsOptions options innerResolver 
+        createDataContractForInternalTag typeToConvert typeCase fsOptions options innerResolver
+    elif fsOptions.UnionEncoding.HasFlag JsonUnionEncoding.Untagged then
+        createDataContractForUntagged typeToConvert typeCase fsOptions options innerResolver
     else
         failwith "unknown encoding"
     
