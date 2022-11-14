@@ -56,7 +56,7 @@ let generateEnumForCache moduleName enumName case =
     let converterConstructor = typedefof<JsonConverterAttribute>.GetConstructor([|typeof<Type>|])
     let myCABuilder = new CustomAttributeBuilder(converterConstructor,[|typedefof<JsonStringEnumConverter>|])
     enumBuilder.SetCustomAttribute(myCABuilder)
-    enumBuilder.DefineLiteral(case,0)
+    enumBuilder.DefineLiteral(case,0) |> ignore
     enumBuilder.CreateType()
 
 
@@ -68,12 +68,16 @@ let generateEnum =
         
     
     
-let generateCases (case:UnionCaseInfo)  =
-    let moduleName = sprintf "%s.%s" case.DeclaringType.Namespace case.DeclaringType.Name 
+let private generateCasesForCache (case:UnionCaseInfo)  =
+    
+    let moduleName = sprintf "%s.%s" case.DeclaringType.Namespace case.DeclaringType.Name
     let aName = new AssemblyName(moduleName)
     let ab = AssemblyBuilder.DefineDynamicAssembly(aName,  AssemblyBuilderAccess.Run )
     let mb = ab.DefineDynamicModule(moduleName)
     let parentType = abstractUnionCase.MakeGenericType(case.DeclaringType)
     let classBuilder = mb.DefineType(case.Name,TypeAttributes.Public,parentType )
     classBuilder.CreateType()
-    
+  
+let generateCases =
+    let cache = ConcurrentDictionary<UnionCaseInfo, Type>()
+    fun u -> cache.GetOrAdd(u, generateCasesForCache)

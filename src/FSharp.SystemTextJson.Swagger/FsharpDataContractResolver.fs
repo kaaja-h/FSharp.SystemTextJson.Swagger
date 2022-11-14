@@ -4,6 +4,7 @@ open System
 open System.Runtime.CompilerServices
 open System.Text.Json
 open System.Text.Json.Serialization
+open FSharp.SystemTextJson.Swagger.Union
 open Microsoft.AspNetCore.Http.Json
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Options
@@ -37,7 +38,7 @@ type internal FsharpDataContractResolver(options:JsonSerializerOptions, fsOption
             | _ ->
                 match ``type`` with
                 | AbstractSubtypes.GenericInherit AbstractSubtypes.abstractUnionCase [|unionType |]   ->
-                        Union.createDataContractForCase unionType ``type`` (effectivefsOptions |> Helper.getEffectiveFsOptions unionType )options json
+                        Union.createDataContractForCase unionType ``type`` (effectivefsOptions |> Helper.getEffectiveFsOptions unionType )options this
                 | _ when ``type``= (typedefof<EmptyArray>) ->
                         DataContract.ForArray(``type``,typeof<string>)
                 | AbstractSubtypes.GenericType AbstractSubtypes.recordForUnionCase [| casetype |] ->
@@ -59,15 +60,17 @@ type DependencyExtension() =
             options.UseOneOfForPolymorphism()
             options.SupportNonNullableReferenceTypes()
             options.SchemaFilter<Tuple.TupleSchemaFilter>()
+            options.SchemaFilter<UnionSchemaFilter>(fsOptions)
             let currentSelector = options.SchemaGeneratorOptions.SubTypesSelector
             options.SchemaGeneratorOptions.SubTypesSelector <- SubtypeSelector.selector fsOptions currentSelector
     
     static member PrepareSerializerDataContractResolver (options:JsonSerializerOptions) (fsOptions:JsonFSharpOptions) : ISerializerDataContractResolver=
         FsharpDataContractResolver(options, fsOptions)
     
-    static member PrepareFilters(): seq<ISchemaFilter> =
+    static member PrepareFilters(fsOptions): seq<ISchemaFilter> =
         seq{
             yield Tuple.TupleSchemaFilter()
+            yield Union.UnionSchemaFilter(fsOptions)
         }            
     
     [<Extension>]

@@ -82,3 +82,10 @@ let getJsonFieldNames (getAttributes: Type -> obj[]) =
     )
     |> readOnlyDict        
         
+let getUnionCaseInfoName (fsOptions:JsonFSharpOptions) (uci:UnionCaseInfo)  =
+    match getJsonNames "case" uci.GetCustomAttributes with
+    | ValueSome name -> name[0]
+    | ValueNone -> JsonName.String(convertName fsOptions.UnionTagNamingPolicy uci.Name)
+    
+    
+     

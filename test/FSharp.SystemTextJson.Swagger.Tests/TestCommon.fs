@@ -22,7 +22,7 @@ let prepareGenerator  (jsonOptions:JsonSerializerOptions) (fsOptions: JsonFSharp
      let options = new SwaggerGenOptions()
      FSharp.SystemTextJson.Swagger.DependencyExtension.SetupDefaultOptions fsOptions setup options
      let resolver = DependencyExtension.PrepareSerializerDataContractResolver jsonOptions fsOptions
-     DependencyExtension.PrepareFilters () |> Seq.fold (fun _ c -> options.SchemaGeneratorOptions.SchemaFilters.Add c ) () 
+     DependencyExtension.PrepareFilters (fsOptions) |> Seq.fold (fun _ c -> options.SchemaGeneratorOptions.SchemaFilters.Add c ) () 
      new SchemaGenerator(options.SchemaGeneratorOptions, resolver )
     
 

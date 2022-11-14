@@ -14,7 +14,7 @@ open Xunit
 
 
 let private prepareJsonSchema  (schema:OpenApiSchema) =
-    use sw = StringWriter()
+    use sw = new StringWriter()
     let jw = OpenApiJsonWriter(sw) 
     schema.SerializeAsV3WithoutReference(jw)
     jw.Flush()
@@ -27,67 +27,95 @@ let optionsWithCamelCase() =
 
 let testData : obj[] list =
     [
-        //simple tuple
-        [|typeof<int*string>; (10,"sss");JsonSerializerOptions();JsonFSharpOptions()|]
-        // simple list
-        [|typeof<int list>; [10;20;30];JsonSerializerOptions();JsonFSharpOptions()|]
-        // complex map
-        [|typeof<Map<int,int>>; Map[(10,20);(30,40)];JsonSerializerOptions();JsonFSharpOptions()|]
-        // inpined map
-        [|typeof<Map<string,int>>; Map[("xxx",20);("ddd",40)];JsonSerializerOptions();JsonFSharpOptions()|]
-        // Record with options
-        [|typeof<RecordTest>; {intData=0;intOptionData=Some 1};JsonSerializerOptions();JsonFSharpOptions()|]
+        [| "simple tuple" ;typeof<int*string>; (10,"sss");JsonSerializerOptions();JsonFSharpOptions()|]
+        [| "simple list";typeof<int list>; [10;20;30];JsonSerializerOptions();JsonFSharpOptions()|]
+        [|"complex map";typeof<Map<int,int>>; Map[(10,20);(30,40)];JsonSerializerOptions();JsonFSharpOptions()|]
+        [|"inlined map";typeof<Map<string,int>>; Map[("xxx",20);("ddd",40)];JsonSerializerOptions();JsonFSharpOptions()|]
+        [|"Record with options";typeof<RecordTest>; {intData=0;intOptionData=Some 1};JsonSerializerOptions();JsonFSharpOptions()|]
         //Option not works because of validator
         //[|typeof<RecordTest>; {intData=0;intOptionData=None};JsonSerializerOptions();JsonFSharpOptions()|]
         
-        //simple AdjecentTag
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag) |]
+        //
+        [|"simple AdjecentTag NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag) |]
+        [|"simple AdjecentTag WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag) |]
+        [|"simple AdjecentTag WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag) |]
+        // AdjecentTag with custom unionTagName
+        [| "AdjecentTag with custom unionTagName NoArgs";typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag, unionTagName = "test") |]
+        [| "AdjecentTag with custom unionTagName WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag, unionTagName = "test") |]
+        [| "AdjecentTag with custom unionTagName WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag, unionTagName = "test") |]
+        // AdjecentTag with custom unionTagNamingPolicy
+        [| "AdjecentTag with custom unionTagNamingPolicy NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag, unionTagNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "AdjecentTag with custom unionTagNamingPolicy WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag, unionTagNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "AdjecentTag with custom unionTagNamingPolicy WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.AdjacentTag, unionTagNamingPolicy = JsonNamingPolicy.CamelCase) |]
         // AdjecentTag with UnwrapFieldlessTags
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "AdjecentTag with UnwrapFieldlessTags NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "AdjecentTag with UnwrapFieldlessTags WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "AdjecentTag with UnwrapFieldlessTags WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
         // AdjecentTag with UnwrapSingleCaseUnions
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
-        [| typedefof<BoxedString>;Box("ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
+        [| "AdjecentTag with UnwrapSingleCaseUnions NoArgs";typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
+        [| "AdjecentTag with UnwrapSingleCaseUnions WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
+        [| "AdjecentTag with UnwrapSingleCaseUnions WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
+        [| "AdjecentTag with UnwrapSingleCaseUnions boxed ";typedefof<BoxedString>;Box("ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleCaseUnions)) |]
         // AdjecentTag with UnwrapSingleFieldCases
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "AdjecentTag with UnwrapSingleFieldCases NoArgs";typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "AdjecentTag with UnwrapSingleFieldCases WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "AdjecentTag with UnwrapSingleFieldCases WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
         // AdjecentTag with NamedFields
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields )) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields )) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields )) |]
+        [| "AdjecentTag with NamedFields NoArgs";typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields )) |]
+        [| "AdjecentTag with NamedFields WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields )) |]
+        [| "AdjecentTag with NamedFields WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields )) |]
+        // AdjecentTag with NamedFields and unionFieldNamingPolicy
+        [| "AdjecentTag with NamedFields and unionFieldNamingPolicy NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields ), unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "AdjecentTag with NamedFields and unionFieldNamingPolicy WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields ), unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "AdjecentTag with NamedFields and unionFieldNamingPolicy WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.AdjacentTag |||JsonUnionEncoding.NamedFields ), unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
         
         //simple ExternalTag
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.ExternalTag) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.ExternalTag) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.ExternalTag) |]      
+        [| "simple ExternalTag NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.ExternalTag) |]
+        [| "simple ExternalTag WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.ExternalTag) |]
+        [| "simple ExternalTag WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.ExternalTag) |]      
         // ExternalTag with UnwrapFieldlessTags
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "ExternalTag with UnwrapFieldlessTags NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "ExternalTag with UnwrapFieldlessTags WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "ExternalTag with UnwrapFieldlessTags WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
         // ExternalTag with UnwrapSingleFieldCases
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
-       // ExternalTag with NamedFields
-        [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields )) |]
-        [| typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields )) |]
-        [| typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields )) |]
-
+        [| "ExternalTag with UnwrapSingleFieldCases NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "ExternalTag with UnwrapSingleFieldCases WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "ExternalTag with UnwrapSingleFieldCases WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        // ExternalTag with NamedFields
+        [| "ExternalTag with NamedFields NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields )) |]
+        [| "ExternalTag with NamedFields WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields )) |]
+        [| "ExternalTag with NamedFields WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields )) |]
+        // ExternalTag with NamedFields and custom unionFieldNamingPolicy
+        [| "ExternalTag with NamedFields and custom unionFieldNamingPolicy NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "ExternalTag with NamedFields and custom unionFieldNamingPolicy WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "ExternalTag with NamedFields and custom unionFieldNamingPolicy WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
         
-
-    
+        // simple InternalTag
+        [| "simple InternalTag NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.InternalTag) |]
+        [| "simple InternalTag WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.InternalTag) |]
+        [| "simple InternalTag WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = JsonUnionEncoding.InternalTag) |]
+        // InternalTag with UnwrapFieldlessTags
+        [| "InternalTag with UnwrapFieldlessTags NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "InternalTag with UnwrapFieldlessTags WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        [| "InternalTag with UnwrapFieldlessTags WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.UnwrapFieldlessTags)) |]
+        // InternalTag with UnwrapSingleFieldCases
+        [| "InternalTag with UnwrapSingleFieldCases NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "InternalTag with UnwrapSingleFieldCases WithOneArg";typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        [| "InternalTag with UnwrapSingleFieldCases WithArgs";typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.UnwrapSingleFieldCases)) |]
+        // InternalTag with NamedFields
+        [| "InternalTag with NamedFields NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]
+        [| "InternalTag with NamedFields WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]
+        [| "InternalTag with NamedFields WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]
+        // InternalTag with NamedFields and custom unionFieldNamingPolicy
+        [| "InternalTag with NamedFields and custom unionFieldNamingPolicy NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "InternalTag with NamedFields and custom unionFieldNamingPolicy WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
+        [| "InternalTag with NamedFields and custom unionFieldNamingPolicy WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields ),unionFieldNamingPolicy = JsonNamingPolicy.CamelCase) |]
     ]
 
 
 [<Theory>]
 [<MemberData(nameof(testData))>]
-let validate (typeToSerialize:Type) (data) (jsonOptions:JsonSerializerOptions) (fsOptions: JsonFSharpOptions) =
+let validate (testName )(typeToSerialize:Type) (data) (jsonOptions:JsonSerializerOptions) (fsOptions: JsonFSharpOptions) =
     jsonOptions.Converters.Add(JsonFSharpConverter(fsOptions))    
     let schema, repository = TestCommon.generateWithOptions jsonOptions fsOptions typeToSerialize
     let inlineSchema = TestCommon.inlineAllReferencedSchemas repository schema
@@ -104,11 +132,12 @@ let validate (typeToSerialize:Type) (data) (jsonOptions:JsonSerializerOptions) (
     
 let oneRowTest : obj[] list =
     [
-       [| typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.ExternalTag |||JsonUnionEncoding.NamedFields )) |]        
-    ]
+ [| "InternalTag with NamedFields NoArgs"; typedefof<Example>; NoArgs; JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]
+ [| "InternalTag with NamedFields WithOneArg"; typedefof<Example>; WithOneArg(3.14); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]
+ [| "InternalTag with NamedFields WithArgs"; typedefof<Example>; WithArgs(1,"ssss"); JsonSerializerOptions(); JsonFSharpOptions(unionEncoding = (JsonUnionEncoding.InternalTag |||JsonUnionEncoding.NamedFields )) |]    ]
    
 [<Theory>]
 [<MemberData(nameof(oneRowTest))>]
-let TestSimpleVal (typeToSerialize:Type) (data) (jsonOptions:JsonSerializerOptions) (fsOptions: JsonFSharpOptions)=
-   validate  typeToSerialize data jsonOptions fsOptions
+let TestSimpleVal name (typeToSerialize:Type) (data) (jsonOptions:JsonSerializerOptions) (fsOptions: JsonFSharpOptions)=
+   validate name  typeToSerialize data jsonOptions fsOptions
   

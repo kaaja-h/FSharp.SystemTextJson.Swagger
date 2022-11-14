@@ -43,8 +43,11 @@ let createDataContract (typeToConvert:Type) (fsOptions: JsonFSharpOptions) (opti
             DataContract.ForObject(abstratType, Seq.empty, jsonConverter = Helper.getJsonConverterFunc options )
 
 
-let prepareEnumTypeForSingleCases (typeToConvert:Type) value =
-    AbstractSubtypes.generateEnum (sprintf "%s.%s"  typeToConvert.Namespace typeToConvert.Name) (value+"Enum") value
+let prepareEnumTypeForSingleCases (typeToConvert:Type) (uci:UnionCaseInfo) (fsOptions: JsonFSharpOptions) =
+    match Helper.getUnionCaseInfoName fsOptions uci with
+    | JsonName.String( name ) ->
+        AbstractSubtypes.generateEnum (sprintf "%s.%s"  typeToConvert.Namespace typeToConvert.Name) (name+"Enum") name
+    | _ -> failwith "Cant make case value as non string"        
     
    
 let getVirtualSubtypes (typeToConvert:Type) (fsOptions: JsonFSharpOptions) =
@@ -53,7 +56,7 @@ let getVirtualSubtypes (typeToConvert:Type) (fsOptions: JsonFSharpOptions) =
     let subtypes = unionCases |>Seq.map (
            fun case-> 
                        if (fsOptions.UnionEncoding.HasFlag JsonUnionEncoding.UnwrapFieldlessTags && case.GetFields() |> Seq.isEmpty ) then
-                           prepareEnumTypeForSingleCases typeToConvert case.Name                           
+                           prepareEnumTypeForSingleCases typeToConvert case fsOptions                         
                        else 
                            AbstractSubtypes.generateCases case                           
             )
@@ -68,7 +71,8 @@ let getUnionCaseInnerFields (typeToConvert:Type) (typeCase:Type) =
     
 
 let createDataContractForAdjacentTag (typeToConvert:Type) (typeCase:Type) (fsOptions: JsonFSharpOptions) (options: JsonSerializerOptions) (innerResolver:ISerializerDataContractResolver) =
-    let enumType = prepareEnumTypeForSingleCases typeToConvert typeCase.Name
+    let uci = FSharpType.GetUnionCases typeToConvert |> Seq.find ( fun c-> c.Name = typeCase.Name)
+    let enumType = prepareEnumTypeForSingleCases typeToConvert uci fsOptions
     let caseNameDataProperty = DataProperty(fsOptions.UnionTagName, enumType, true, false, false, false, null )
     
     let fields = getUnionCaseInnerFields typeToConvert typeCase |> Seq.map (fun f -> f.PropertyType)|> Seq.toArray
@@ -113,6 +117,22 @@ let createDataContractForExternalTag (typeToConvert:Type) (typeCase:Type) (fsOpt
     let dataProperty = DataProperty(typeCase.Name, dataContractFieldType, true, false,false,false,null)                
     DataContract.ForObject(typeCase, [|dataProperty|], jsonConverter = Helper.getJsonConverterFunc options)            
     
+let createDataContractForInternalTag (typeToConvert:Type) (typeCase:Type) (fsOptions: JsonFSharpOptions) (options: JsonSerializerOptions) (innerResolver:ISerializerDataContractResolver) =
+    let uci = FSharpType.GetUnionCases typeToConvert |> Seq.find ( fun c-> c.Name = typeCase.Name)
+    let enumType = prepareEnumTypeForSingleCases typeToConvert uci fsOptions
+    if fsOptions.UnionEncoding.HasFlag  JsonUnionEncoding.NamedFields then
+        let recordType = typedefof<RecordForUnionCase<_>>.MakeGenericType(typeCase)
+        let res = innerResolver.GetDataContractForType(recordType)
+        let caseProperty = DataProperty(fsOptions.UnionTagName, enumType, true, false, false, false, null )
+        let newProperties = Seq.append [caseProperty] res.ObjectProperties
+        DataContract.ForObject( typeCase,newProperties )
+        
+    else        
+        let fields = getUnionCaseInnerFields typeToConvert typeCase |> Seq.map (fun f -> f.PropertyType)|> Seq.toArray        
+                 
+        let tupleType = FSharpType.MakeTupleType( Array.append [|enumType|] fields   )
+        innerResolver.GetDataContractForType(tupleType)
+    
     
 let createDataContractForCase (typeToConvert:Type) (typeCase:Type) (fsOptions: JsonFSharpOptions) (options: JsonSerializerOptions) (innerResolver:ISerializerDataContractResolver) =
      
@@ -120,6 +140,8 @@ let createDataContractForCase (typeToConvert:Type) (typeCase:Type) (fsOptions: J
         createDataContractForAdjacentTag typeToConvert typeCase fsOptions options innerResolver
     elif fsOptions.UnionEncoding.HasFlag JsonUnionEncoding.ExternalTag then
         createDataContractForExternalTag typeToConvert typeCase fsOptions options innerResolver
+    elif fsOptions.UnionEncoding.HasFlag JsonUnionEncoding.InternalTag then
+        createDataContractForInternalTag typeToConvert typeCase fsOptions options innerResolver 
     else
         failwith "unknown encoding"
     
@@ -178,3 +200,12 @@ let createDataContractForRecordCase (typeToConvert:Type) (typeCase:Type) (record
       
 
     
+type UnionSchemaFilter(fsOptions: JsonFSharpOptions) =
+    interface ISchemaFilter with
+        member this.Apply(schema, context) =
+           if TypeCache.getKind context.Type = TypeCache.TypeKind.Union
+                && (Helper.getEffectiveFsOptions context.Type fsOptions).UnionEncoding.HasFlag JsonUnionEncoding.InternalTag
+                && not ((Helper.getEffectiveFsOptions context.Type fsOptions).UnionEncoding.HasFlag JsonUnionEncoding.NamedFields) then
+              schema.AnyOf <- schema.OneOf
+              schema.OneOf <- List()
+             
