@@ -3,14 +3,14 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <PackageVersion>0.0.1</PackageVersion>
+        <PackageVersion>0.0.2</PackageVersion>
         <Title>FSharp.SystemTextJson.Swagger</Title>
         <Description>Swagger settings for [FSharp.SystemTextJson]</Description>
         <PackageProjectUrl>https://github.com/kaaja-h/FSharp.SystemTextJson.Swagger</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/kaaja-h/FSharp.SystemTextJson.Swagger</RepositoryUrl>
         <PackageTags>FSharp SystemTextJson Swagger</PackageTags>
-        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <AssemblyVersion>0.0.2</AssemblyVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 

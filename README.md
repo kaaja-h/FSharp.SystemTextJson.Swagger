@@ -52,5 +52,5 @@ Not everything is now implemented. Some things works with limitations
     
 
 ### Unions
-- Only partialy works only unwrapped options
-- Other in progress
+- Almost every setup combinations works
+- Still experimental
