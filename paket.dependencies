@@ -1,0 +1,27 @@
+source https://api.nuget.org/v3/index.json
+
+nuget coverlet.collector
+nuget Microsoft.NET.Test.Sdk
+nuget NJsonSchema 10.8.0
+nuget xunit 2.4.1
+nuget xunit.runner.visualstudio 2.4.3
+nuget Swashbuckle.AspNetCore 6.5.0
+nuget Swashbuckle.AspNetCore.Swagger 6.5.0
+nuget Swashbuckle.AspNetCore.SwaggerGen 6.5.0
+nuget Swashbuckle.AspNetCore.SwaggerUI 6.5.0
+nuget FSharp.SystemTextJson 1.1.23  
+nuget FSharp.Core 8.0.200
+
+
+group net60
+     source https://api.nuget.org/v3/index.json
+     framework: net60
+
+group net70
+     source https://api.nuget.org/v3/index.json
+     framework: net70
+
+group net80
+     source https://api.nuget.org/v3/index.json
+     framework: net80
+

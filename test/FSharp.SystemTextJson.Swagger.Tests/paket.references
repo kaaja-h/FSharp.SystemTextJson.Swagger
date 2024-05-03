@@ -1,0 +1,9 @@
+FSharp.SystemTextJson
+Microsoft.NET.Test.Sdk
+NJsonSchema
+Swashbuckle.AspNetCore.SwaggerGen
+Swashbuckle.AspNetCore.SwaggerUI
+xunit
+xunit.runner.visualstudio
+coverlet.collector
+FSharp.Core

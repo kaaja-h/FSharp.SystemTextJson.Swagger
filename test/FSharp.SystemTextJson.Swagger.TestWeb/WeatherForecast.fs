@@ -21,6 +21,11 @@ type LLL(myReadWriteProperty:string) =
         with get () = myInternalValue
         and set (value) = myInternalValue <- value
 
+type TestEnum =
+    |AAA=1
+    |BBB=2
+
+
 type WeatherForecast =
     { Date: DateTime
       TemperatureC: int option
@@ -32,6 +37,7 @@ type WeatherForecast =
       tuple: (int*string)
       lll:LLL
       u:Union
+      ppp:TestEnum
       }
 
 

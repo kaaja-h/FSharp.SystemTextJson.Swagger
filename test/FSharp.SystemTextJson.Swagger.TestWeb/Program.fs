@@ -20,6 +20,7 @@ module Program =
         //setup usage of JsonFSharpConverter                
         builder.Services.AddControllers()
                     .AddJsonOptions(fun opts ->
+                        opts.JsonSerializerOptions.Converters.Add(JsonStringEnumConverter())
                         opts.JsonSerializerOptions.Converters.Add(JsonFSharpConverter(fsOptions))) 
         // setup usage of SwaggerForSystemTextJson - use instead AddSwaggerGen 
         builder.Services.AddSwaggerForSystemTextJson(fsOptions)

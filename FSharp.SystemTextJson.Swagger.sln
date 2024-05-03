@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{FE5B369F-D0DA-4599-BC0C-8260D2E7FB48}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A3412871-020D-43F1-A37E-03E08C0CD821}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.SystemTextJson.Swagger", "src\FSharp.SystemTextJson.Swagger\FSharp.SystemTextJson.Swagger.fsproj", "{9BA0F1EF-C664-45CD-B564-2108E8682142}"
